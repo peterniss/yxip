@@ -1,0 +1,58 @@
+mixed-port: 7890
+redir-port: 7892
+allow-lan: true
+bind-address: "*"
+mode: rule
+log-level: info
+ipv6: false
+external-controller: 0.0.0.0:9090
+
+dns:
+  enabled: true
+  listen: 0.0.0.0:1053
+  enhanced-mode: redir-host
+  ipv6: false
+  default-nameserver:
+    - 223.5.5.5
+    - 119.29.29.29
+  nameserver:
+    - 223.5.5.5
+    - 119.29.29.29
+    - https://doh.pub/dns-query
+
+proxies: []
+
+proxy-providers:
+  subs_main:
+    type: http
+    url: "REPLACE_WITH_SUBSCRIPTION_URL_MAIN"
+    interval: 43200
+    path: ./providers/subs_main.yaml
+    health-check:
+      enable: true
+      interval: 600
+      url: https://cp.cloudflare.com/generate_204
+
+proxy-groups:
+  - name: Proxy
+    type: select
+    proxies:
+      - Auto
+      - DIRECT
+    use: [subs_main]
+
+  - name: Auto
+    type: url-test
+    use: [subs_main]
+    url: https://cp.cloudflare.com/generate_204
+    interval: 180
+
+  - name: Domestic
+    type: select
+    proxies:
+      - DIRECT
+      - Proxy
+
+rules:
+  - GEOIP,CN,Domestic
+  - MATCH,Proxy

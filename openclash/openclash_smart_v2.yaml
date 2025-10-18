@@ -1,0 +1,483 @@
+mixed-port: 7890
+redir-port: 7892
+allow-lan: true
+bind-address: "*"
+mode: rule
+log-level: info
+ipv6: false
+external-controller: 0.0.0.0:9090
+
+profile:
+  store-selected: true
+  store-fake-ip: true
+
+dns:
+  enabled: true
+  listen: 0.0.0.0:1053
+  ipv6: false
+  enhanced-mode: redir-host
+  default-nameserver:
+    - 223.5.5.5
+    - 119.29.29.29
+  nameserver:
+    - 223.5.5.5
+    - 119.29.29.29
+    - https://doh.pub/dns-query
+  fallback:
+    - 1.1.1.1
+    - 8.8.8.8
+    - https://cloudflare-dns.com/dns-query
+  fallback-filter:
+    geoip: true
+    ipcidr:
+      - 240.0.0.0/4
+
+proxies: []
+
+proxy-providers:
+  subs_main:
+    type: http
+    url: "REPLACE_WITH_SUBSCRIPTION_URL_MAIN"
+    interval: 43200
+    path: ./providers/subs_main.yaml
+    health-check:
+      enable: true
+      interval: 600
+      url: https://cp.cloudflare.com/generate_204
+  subs_extra:
+    type: http
+    url: "REPLACE_WITH_SUBSCRIPTION_URL_EXTRA"
+    interval: 43200
+    path: ./providers/subs_extra.yaml
+    health-check:
+      enable: true
+      interval: 600
+      url: https://cp.cloudflare.com/generate_204
+
+proxy-groups:
+  - name: Proxy
+    type: select
+    proxies:
+      - Auto
+      - Fallback
+      - LoadBalance
+      - HK
+      - JP
+      - SG
+      - US
+      - DIRECT
+    use: [subs_main, subs_extra]
+
+  - name: Auto
+    type: url-test
+    use: [subs_main, subs_extra]
+    url: https://cp.cloudflare.com/generate_204
+    interval: 180
+    tolerance: 50
+
+  - name: Fallback
+    type: fallback
+    use: [subs_main, subs_extra]
+    url: https://cp.cloudflare.com/generate_204
+    interval: 300
+
+  - name: LoadBalance
+    type: load-balance
+    use: [subs_main, subs_extra]
+    url: https://cp.cloudflare.com/generate_204
+    interval: 300
+    strategy: round-robin
+
+  - name: HK
+    type: url-test
+    use: [subs_main, subs_extra]
+    filter: "(?i)HK|Hong|香港"
+    url: https://cp.cloudflare.com/generate_204
+    interval: 300
+
+  - name: JP
+    type: url-test
+    use: [subs_main, subs_extra]
+    filter: "(?i)JP|Japan|日本|东京|大阪"
+    url: https://cp.cloudflare.com/generate_204
+    interval: 300
+
+  - name: SG
+    type: url-test
+    use: [subs_main, subs_extra]
+    filter: "(?i)SG|Singapore|新加坡"
+    url: https://cp.cloudflare.com/generate_204
+    interval: 300
+
+  - name: US
+    type: url-test
+    use: [subs_main, subs_extra]
+    filter: "(?i)US|United States|美国|洛杉矶|硅谷|达拉斯|纽约"
+    url: https://cp.cloudflare.com/generate_204
+    interval: 300
+
+  - name: Domestic
+    type: select
+    proxies:
+      - DIRECT
+      - Proxy
+
+  - name: Microsoft
+    type: select
+    proxies:
+      - Auto
+      - Proxy
+      - DIRECT
+      - HK
+      - JP
+      - SG
+      - US
+
+  - name: Apple
+    type: select
+    proxies:
+      - DIRECT
+      - Auto
+      - Proxy
+      - HK
+      - JP
+      - SG
+      - US
+
+  - name: Google
+    type: select
+    proxies:
+      - Auto
+      - Proxy
+      - HK
+      - JP
+      - SG
+      - US
+      - DIRECT
+
+  - name: GitHub
+    type: select
+    proxies:
+      - Auto
+      - Proxy
+      - HK
+      - JP
+      - SG
+      - US
+      - DIRECT
+
+  - name: YouTube
+    type: select
+    proxies:
+      - Auto
+      - HK
+      - JP
+      - SG
+      - US
+      - Proxy
+      - DIRECT
+
+  - name: Netflix
+    type: select
+    proxies:
+      - Auto
+      - HK
+      - JP
+      - SG
+      - US
+      - Proxy
+      - DIRECT
+
+  - name: Disney
+    type: select
+    proxies:
+      - Auto
+      - HK
+      - JP
+      - SG
+      - US
+      - Proxy
+      - DIRECT
+
+  - name: Spotify
+    type: select
+    proxies:
+      - Auto
+      - Proxy
+      - DIRECT
+      - HK
+      - JP
+      - SG
+      - US
+
+  - name: Telegram
+    type: select
+    proxies:
+      - Auto
+      - HK
+      - JP
+      - SG
+      - US
+      - Proxy
+      - DIRECT
+
+  - name: Steam
+    type: select
+    proxies:
+      - Auto
+      - Proxy
+      - DIRECT
+      - HK
+      - JP
+      - SG
+      - US
+
+  - name: OpenAI
+    type: select
+    proxies:
+      - US
+      - SG
+      - JP
+      - HK
+      - Auto
+      - Proxy
+      - DIRECT
+
+  - name: TikTok
+    type: select
+    proxies:
+      - Auto
+      - HK
+      - JP
+      - SG
+      - US
+      - Proxy
+      - DIRECT
+
+  - name: PrimeVideo
+    type: select
+    proxies:
+      - Auto
+      - HK
+      - JP
+      - SG
+      - US
+      - Proxy
+      - DIRECT
+
+  - name: Hulu
+    type: select
+    proxies:
+      - Auto
+      - HK
+      - JP
+      - SG
+      - US
+      - Proxy
+      - DIRECT
+
+  - name: HBO
+    type: select
+    proxies:
+      - Auto
+      - HK
+      - JP
+      - SG
+      - US
+      - Proxy
+      - DIRECT
+
+  - name: BBC
+    type: select
+    proxies:
+      - Auto
+      - HK
+      - JP
+      - SG
+      - US
+      - Proxy
+      - DIRECT
+
+  - name: Twitch
+    type: select
+    proxies:
+      - Auto
+      - HK
+      - JP
+      - SG
+      - US
+      - Proxy
+      - DIRECT
+
+  - name: GlobalMedia
+    type: select
+    proxies:
+      - YouTube
+      - Netflix
+      - Disney
+      - PrimeVideo
+      - Hulu
+      - HBO
+      - BBC
+      - Spotify
+      - Twitch
+      - Proxy
+      - Auto
+      - DIRECT
+
+rule-providers:
+  Reject:
+    type: http
+    behavior: classical
+    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Advertising/Advertising.yaml
+    path: ./ruleset/blackmatrix/Reject.yaml
+    interval: 86400
+
+  Microsoft:
+    type: http
+    behavior: classical
+    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Microsoft/Microsoft.yaml
+    path: ./ruleset/blackmatrix/Microsoft.yaml
+    interval: 86400
+
+  Apple:
+    type: http
+    behavior: classical
+    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Apple/Apple.yaml
+    path: ./ruleset/blackmatrix/Apple.yaml
+    interval: 86400
+
+  Google:
+    type: http
+    behavior: classical
+    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Google/Google.yaml
+    path: ./ruleset/blackmatrix/Google.yaml
+    interval: 86400
+
+  GitHub:
+    type: http
+    behavior: classical
+    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/GitHub/GitHub.yaml
+    path: ./ruleset/blackmatrix/GitHub.yaml
+    interval: 86400
+
+  YouTube:
+    type: http
+    behavior: classical
+    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/YouTube/YouTube.yaml
+    path: ./ruleset/blackmatrix/YouTube.yaml
+    interval: 86400
+
+  Netflix:
+    type: http
+    behavior: classical
+    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Netflix/Netflix.yaml
+    path: ./ruleset/blackmatrix/Netflix.yaml
+    interval: 86400
+
+  Disney:
+    type: http
+    behavior: classical
+    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Disney/Disney.yaml
+    path: ./ruleset/blackmatrix/Disney.yaml
+    interval: 86400
+
+  Spotify:
+    type: http
+    behavior: classical
+    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Spotify/Spotify.yaml
+    path: ./ruleset/blackmatrix/Spotify.yaml
+    interval: 86400
+
+  Telegram:
+    type: http
+    behavior: classical
+    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Telegram/Telegram.yaml
+    path: ./ruleset/blackmatrix/Telegram.yaml
+    interval: 86400
+
+  Steam:
+    type: http
+    behavior: classical
+    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Steam/Steam.yaml
+    path: ./ruleset/blackmatrix/Steam.yaml
+    interval: 86400
+
+  OpenAI:
+    type: http
+    behavior: classical
+    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/OpenAI/OpenAI.yaml
+    path: ./ruleset/blackmatrix/OpenAI.yaml
+    interval: 86400
+
+  TikTok:
+    type: http
+    behavior: classical
+    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/TikTok/TikTok.yaml
+    path: ./ruleset/blackmatrix/TikTok.yaml
+    interval: 86400
+
+  PrimeVideo:
+    type: http
+    behavior: classical
+    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/PrimeVideo/PrimeVideo.yaml
+    path: ./ruleset/blackmatrix/PrimeVideo.yaml
+    interval: 86400
+
+  Hulu:
+    type: http
+    behavior: classical
+    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Hulu/Hulu.yaml
+    path: ./ruleset/blackmatrix/Hulu.yaml
+    interval: 86400
+
+  HBO:
+    type: http
+    behavior: classical
+    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/HBO/HBO.yaml
+    path: ./ruleset/blackmatrix/HBO.yaml
+    interval: 86400
+
+  BBC:
+    type: http
+    behavior: classical
+    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/BBC/BBC.yaml
+    path: ./ruleset/blackmatrix/BBC.yaml
+    interval: 86400
+
+  Twitch:
+    type: http
+    behavior: classical
+    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/Twitch/Twitch.yaml
+    path: ./ruleset/blackmatrix/Twitch.yaml
+    interval: 86400
+
+  ChinaDomain:
+    type: http
+    behavior: classical
+    url: https://raw.githubusercontent.com/blackmatrix7/ios_rule_script/master/rule/Clash/China/China.yaml
+    path: ./ruleset/blackmatrix/ChinaDomain.yaml
+    interval: 86400
+
+rules:
+  - RULE-SET,Reject,REJECT
+  - RULE-SET,OpenAI,OpenAI
+  - RULE-SET,GitHub,GitHub
+  - RULE-SET,YouTube,YouTube
+  - RULE-SET,Netflix,Netflix
+  - RULE-SET,Disney,Disney
+  - RULE-SET,PrimeVideo,PrimeVideo
+  - RULE-SET,Hulu,Hulu
+  - RULE-SET,HBO,HBO
+  - RULE-SET,BBC,BBC
+  - RULE-SET,Spotify,Spotify
+  - RULE-SET,Twitch,Twitch
+  - RULE-SET,TikTok,TikTok
+  - RULE-SET,Telegram,Telegram
+  - RULE-SET,Steam,Steam
+  - RULE-SET,Microsoft,Microsoft
+  - RULE-SET,Apple,Apple
+  - RULE-SET,Google,Google
+  - RULE-SET,ChinaDomain,Domestic
+  - GEOIP,CN,Domestic
+  - MATCH,Proxy
