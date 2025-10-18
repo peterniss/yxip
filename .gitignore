@@ -1,0 +1,44 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Environments
+.env
+.env.*
+.venv/
+venv/
+env/
+
+# Packaging
+build/
+dist/
+.eggs/
+*.egg-info/
+wheels/
+
+# Caches
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+.pytype/
+.cache/
+
+# Coverage
+.coverage
+.coverage.*
+htmlcov/
+coverage.xml
+
+# Editors/OS
+.vscode/
+.idea/
+.DS_Store
+
+# Logs
+*.log
+
+# Misc
+pip-wheel-metadata/
+site/
+.pypirc
